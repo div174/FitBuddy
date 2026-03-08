@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Error — FitBuddy{% endblock %}
+{% block content %}
+<section class="error-section">
+  <div class="container" style="text-align:center;padding:80px 24px">
+    <div style="font-size:64px;margin-bottom:24px">⚠️</div>
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:48px;margin-bottom:16px">Something went wrong</h1>
+    <p style="color:var(--text-muted);max-width:480px;margin:0 auto 32px;line-height:1.7">{{ error }}</p>
+    <a href="/" class="btn-primary">← Try Again</a>
+  </div>
+</section>
+{% endblock %}

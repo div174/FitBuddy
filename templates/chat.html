@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}AI Coach — {{ plan.name }} — FitBuddy{% endblock %}
+
+{% block content %}
+<section class="features container" style="padding-top: 140px; padding-bottom: 100px;">
+  <div class="features-inner">
+    <div class="chat-wrapper glass-panel">
+      <div class="chat-header">
+        <div class="chat-avatar">🤖</div>
+        <div class="chat-info">
+          <div class="chat-name">Coach Gemini</div>
+          <div class="chat-status"><span class="pulse-dot" style="display:inline-block; width:8px; height:8px; margin-right:4px;"></span> Online · Analysis Ready</div>
+        </div>
+        <div style="margin-left: auto;">
+            <a href="/plan/{{ plan.id }}" class="btn-outline" style="padding: 6px 12px; font-size: 11px;">Eject to Blueprint</a>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="messages">
+        <!-- Initial Message -->
+        <div class="msg ai-msg">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-bubble">
+            <p>Salutations, <strong>{{ plan.name }}</strong>. I have successfully high-indexed your physical parameters and roadmap.</p>
+            <p>How can I assist your performance today? I can adjust meal plans, explain compound movements, or provide psychological leverage for your next session.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-suggestions">
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">Swap a meal for vegetarian</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">Explain progressive overload</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">I feel unusually tired today</button>
+      </div>
+
+      <div class="chat-input-row">
+        <input type="text" id="userInput" placeholder="Command the AI Coach..." onkeydown="if(event.key==='Enter') sendMessage()"/>
+        <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()">⚡</button>
+      </div>
+      <div style="padding: 10px 20px; font-size: 10px; color: var(--dim); text-align: center;">
+          Powered by Gemini 2.0 · Consult a medical professional for health advice.
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PLAN_ID = {{ plan.id }};
+let history = [];
+
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const question = input.value.trim();
+  if (!question) return;
+
+  input.value = '';
+  appendMsg('user', question);
+  history.push({ role: 'user', content: question });
+
+  const typingId = appendTyping();
+  document.getElementById('sendBtn').disabled = true;
+
+  try {
+    const fd = new FormData();
+    fd.append('question', question);
+    fd.append('history', JSON.stringify(history.slice(-8)));
+
+    const res = await fetch(`/chat/${PLAN_ID}/ask`, { method: 'POST', body: fd });
+    const data = await res.json();
+    removeTyping(typingId);
+
+    if (data.error) {
+      appendMsg('ai', '⚠️ Protocol error: ' + data.error);
+    } else {
+      appendMsg('ai', data.answer);
+      history.push({ role: 'assistant', content: data.answer });
+    }
+  } catch (e) {
+    removeTyping(typingId);
+    appendMsg('ai', '⚠️ Signal lost. Recommencing uplink...');
+  }
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function appendMsg(role, content) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role === 'user' ? 'user-msg' : 'ai-msg'}`;
+  
+  if (role === 'user') {
+    div.innerHTML = `<div class="user-av msg-avatar">U</div><div class="msg-bubble">${escapeHtml(content)}</div>`;
+  } else {
+    // Basic markdown-ish formatting for AI
+    const formatted = content
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble"><p>${formatted}</p></div>`;
+  }
+  
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function appendTyping() {
+  const msgs = document.getElementById('messages');
+  const id = 'typing_' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg ai-msg';
+  div.id = id;
+  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble typing-bubble"><div class="dots"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) {
+  document.getElementById(id)?.remove();
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function sendSuggestion(btn) {
+  document.getElementById('userInput').value = btn.textContent;
+  sendMessage();
+}
+</script>
+{% endblock %}

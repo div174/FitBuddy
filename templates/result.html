@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}{{ plan.name }}'s Fitness Plan — FitBuddy{% endblock %}
+
+{% block content %}
+
+<!-- Plan header -->
+<header class="plan-header">
+  <div class="container plan-header-inner">
+    <div class="plan-info">
+      <div class="plan-badge">AI-GENERATED ROADMAP #{{ plan.id }}</div>
+      <h1 class="plan-name">{{ plan.name }}'s Blueprint</h1>
+      <div class="plan-meta">
+        🎯 {{ plan.goal }} &nbsp;•&nbsp; 🏋️ {{ plan.fitness_level }} &nbsp;•&nbsp; 📅 {{ plan.days_per_week }}x per week
+      </div>
+    </div>
+    
+    <div class="plan-stats-row">
+      <div class="pstat">
+        <span class="pstat-v">{{ plan.age }}</span>
+        <span class="pstat-l">Years</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-v">{{ plan.weight }}</span>
+        <span class="pstat-l">KG</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-v">{{ plan.bmi }}</span>
+        <span class="pstat-l">BMI</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Tabs -->
+<nav class="tabs-bar" id="planTabs">
+  <div class="container tabs-inner">
+    <button class="tab active" data-tab="workout">Workout Plan</button>
+    <button class="tab" data-tab="diet">Nutrition Plan</button>
+    <button class="tab" data-tab="tips">AI Coach Tips</button>
+    {% if plan.updated_plan %}
+    <button class="tab" data-tab="updated">🔄 Revisions</button>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="container content-inner" style="margin-top: 60px; margin-bottom: 100px;">
+  <!-- Feedback Banner -->
+  {% if feedback_applied %}
+  <div class="insight-box" style="margin-bottom: 32px;">
+    <strong>Success!</strong> Your coaching feedback has been parsed and integrated into the revised plan segments below.
+  </div>
+  {% endif %}
+
+  <!-- Workout Tab -->
+  <div id="tab-workout" class="tab-content active">
+    <div class="principles-card">
+      <div class="overview-bar">
+        <div class="overview-text">
+          Our engine has calculated a <strong>{{ plan.workout_duration }}-minute</strong> high-intensity resistance program designed specifically for your <strong>{{ plan.equipment }}</strong> setup.
+        </div>
+      </div>
+      <div class="ai-content">
+        {{ plan.workout_plan | safe }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Diet Tab -->
+  <div id="tab-diet" class="tab-content">
+    <div class="principles-card">
+      <div class="overview-bar" style="border-left-color: var(--orange);">
+        <div class="overview-text">
+          Fueling your performance with a <strong>{{ plan.dietary_pref }}</strong> macro-balanced protocol tailored to your metabolism and goals.
+        </div>
+      </div>
+      <div class="ai-content">
+        {{ plan.diet_plan | safe }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips Tab -->
+  <div id="tab-tips" class="tab-content">
+    <div class="tips-card glass-panel">
+      <h2>Strategic Insight</h2>
+      <p class="tips-sub">Personalized coaching notes from the Gemini 2.0 Engine.</p>
+      <div class="tips-body ai-content">
+        {{ plan.ai_tips | safe }}
+      </div>
+    </div>
+  </div>
+
+  {% if plan.updated_plan %}
+  <div id="tab-updated" class="tab-content">
+    <div class="principles-card" style="border-left-color: var(--lime);">
+      <h3>🔄 Revised Strategy</h3>
+      <div class="insight-box" style="background: rgba(255,255,255,0.03); color: var(--muted); border-color: var(--border);">
+        <strong>Your Feedback:</strong> "{{ plan.feedback }}"
+      </div>
+      <div class="ai-content">
+        {{ plan.updated_plan | safe }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Feedback Card -->
+  <div class="feedback-card glass-panel" style="margin-top: 60px;">
+    <h3>Coach Feedback Loop</h3>
+    <p>Need to adjust your training volume or dietary targets? Send a specific request to the coach below.</p>
+    <form action="/feedback" method="POST" id="feedbackForm" class="feedback-form">
+      <input type="hidden" name="plan_id" value="{{ plan.id }}"/>
+      <textarea name="feedback" placeholder="e.g. Increase cardio frequency, swap shellfish for other proteins..." required minlength="5" rows="4"></textarea>
+      <button type="submit" class="btn-primary" id="feedbackBtn">
+        <span class="feedback-text">⚡ Refine My Plan</span>
+        <span class="feedback-loading" style="display:none"><span class="spinner"></span> Processing...</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="progress-form" style="margin-top: 100px; display: flex; justify-content: center; gap: 20px;">
+    <a href="/chat/{{ plan.id }}" class="btn-primary" style="background: var(--blue);">💬 Live AI Coaching</a>
+    <button onclick="window.print()" class="btn-outline">Download PDF (Print)</button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabId = btn.getAttribute('data-tab');
+    
+    // UI
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Content
+    document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    
+    // Scroll to tab bar if content is far below
+    const bar = document.getElementById('planTabs');
+    if (window.scrollY > bar.offsetTop) {
+       window.scrollTo({ top: bar.offsetTop - 80, behavior: 'smooth' });
+    }
+  });
+});
+
+// Feedback form loading state
+document.getElementById('feedbackForm')?.addEventListener('submit', function() {
+  const btn = document.getElementById('feedbackBtn');
+  btn.querySelector('.feedback-text').style.display = 'none';
+  btn.querySelector('.feedback-loading').style.display = 'inline-flex';
+  btn.disabled = true;
+});
+
+// Auto-switch to updated tab if feedback was applied
+{% if feedback_applied %}
+document.querySelector('[data-tab="updated"]')?.click();
+{% endif %}
+</script>
+{% endblock %}

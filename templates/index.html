@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}FitBuddy — Your AI Fitness Coach{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-accent"></div>
+  <div class="hero-bg-accent-2"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        Next-Gen AI Fitness
+      </div>
+      <h1 class="hero-title">
+        Your Body.<br>
+        Your Goals.<br>
+        <span class="hero-accent">Our Intelligence.</span>
+      </h1>
+      <p class="hero-sub">
+        Stop guessing. Get precision-engineered workout and nutrition plans powered by Google Gemini AI, tailored to your biology and equipment.
+      </p>
+      
+      <div class="hero-stats heading-font">
+        <div class="hstat">
+          <span class="hstat-n">10k+</span>
+          <span class="hstat-l">Plans Born</span>
+        </div>
+        <div class="hstat-div"></div>
+        <div class="hstat">
+          <span class="hstat-n">99%</span>
+          <span class="hstat-l">Precision</span>
+        </div>
+        <div class="hstat-div"></div>
+        <div class="hstat">
+          <span class="hstat-n">24/7</span>
+          <span class="hstat-l">AI Coach</span>
+        </div>
+      </div>
+
+      <a href="#generate" class="btn-primary hero-cta">
+        Start Your Transformation <span>→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="features-inner">
+    <div class="section-header">
+      <div class="section-label">THE PLATFORM</div>
+      <h2 class="section-title">Built for Performance</h2>
+      <p class="section-sub">A complete ecosystem designed to help you crush your goals with zero friction.</p>
+    </div>
+    
+    <div class="feature-grid">
+      <div class="feat-card glass-card">
+        <div class="feat-icon">🏋️</div>
+        <h3>Adaptive Workouts</h3>
+        <p>Scientific training blocks that evolve based on your available equipment and physical limitations.</p>
+      </div>
+      <div class="feat-card glass-card">
+        <div class="feat-icon">🍱</div>
+        <h3>Precision Nutrition</h3>
+        <p>7-day meal plans with exact calorie/macro targets and simplified shopping lists.</p>
+      </div>
+      <div class="feat-card glass-card">
+        <div class="feat-icon">🤖</div>
+        <h3>Coach 2.0</h3>
+        <p>The first AI fitness coach that actually knows you. Chat anytime for tips or plan adjustments.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORM SECTION -->
+<section class="form-section" id="generate">
+  <div class="form-section-inner">
+    <div class="section-header">
+      <div class="section-label">GENERATOR</div>
+      <h2 class="section-title">Initialize Your Profile</h2>
+      <p class="section-sub">Provide your metrics once. Gemini handles the rest.</p>
+    </div>
+
+    <form class="plan-form glass-panel" action="/generate" method="POST" id="planForm">
+
+      <!-- Personal Info -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <span class="form-card-icon">👤</span>
+          <h3>Biometrics & Identity</h3>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">First Name</label>
+            <input type="text" id="name" name="name" placeholder="e.g. Alex" required maxlength="100"/>
+          </div>
+          <div class="field">
+            <label for="age">Age</label>
+            <input type="number" id="age" name="age" placeholder="25" min="13" max="100" required/>
+          </div>
+          <div class="field">
+            <label for="weight">Weight (kg)</label>
+            <input type="number" id="weight" name="weight" placeholder="70" step="0.1" min="20" max="400" required/>
+          </div>
+          <div class="field">
+            <label for="height">Height (cm)</label>
+            <input type="number" id="height" name="height" placeholder="175" min="100" max="280" required/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Gender Identity</label>
+          <div class="seg-group">
+            <label class="seg"><input type="radio" name="gender" value="male" checked/><span>Male</span></label>
+            <label class="seg"><input type="radio" name="gender" value="female"/><span>Female</span></label>
+            <label class="seg"><input type="radio" name="gender" value="other"/><span>Other</span></label>
+          </div>
+        </div>
+        <div class="bmi-display" id="bmiDisplay" style="display:none">
+          Live BMI Index: <strong id="bmiVal">—</strong> <span id="bmiCategory" class="bmi-cat"></span>
+        </div>
+      </div>
+
+      <!-- Training Targets -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <span class="form-card-icon">🎯</span>
+          <h3>Primary Objective</h3>
+        </div>
+        <div class="field">
+          <div class="goal-grid">
+            {% for goal, emoji in [("Weight Loss","🔥"),("Muscle Gain","💪"),("Endurance","🏃"),("Strength","🏋️"),("Flexibility","🧘"),("General Fitness","⚡")] %}
+            <label class="goal-card">
+              <input type="radio" name="goal" value="{{ goal }}" {% if goal == "General Fitness" %}checked{% endif %}/>
+              <span class="goal-emoji">{{ emoji }}</span>
+              <span class="goal-label">{{ goal }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Fitness Level</label>
+            <div class="seg-group">
+              <label class="seg"><input type="radio" name="fitness_level" value="Beginner" checked/><span>Beginner</span></label>
+              <label class="seg"><input type="radio" name="fitness_level" value="Intermediate"/><span>Intermediate</span></label>
+              <label class="seg"><input type="radio" name="fitness_level" value="Advanced"/><span>Advanced</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="activity_level">Activity Level</label>
+            <select id="activity_level" name="activity_level">
+              <option value="sedentary">Sedentary (desk job)</option>
+              <option value="lightly active">Lightly Active</option>
+              <option value="moderately active" selected>Moderately Active</option>
+              <option value="very active">Very Active</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logistics -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <span class="form-card-icon">⚡</span>
+          <h3>Lifestyle & Constraints</h3>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="days_per_week">Frequency: <span class="range-val" id="daysVal">4</span> days/week</label>
+            <input type="range" id="days_per_week" name="days_per_week" min="2" max="7" value="4" oninput="document.getElementById('daysVal').textContent=this.value"/>
+          </div>
+          <div class="field">
+            <label for="workout_duration">Duration: <span class="range-val" id="durVal">45</span> mins</label>
+            <input type="range" id="workout_duration" name="workout_duration" min="15" max="120" step="5" value="45" oninput="document.getElementById('durVal').textContent=this.value"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Available Equipment</label>
+          <div class="chip-group" id="equipmentChips">
+            {% for eq in ["No Equipment","Dumbbells","Barbell","Resistance Bands","Pull-up Bar","Bench","Cables","Full Gym"] %}
+            <label class="chip"><input type="checkbox" name="equipment_check" value="{{ eq }}" {% if eq == "No Equipment" %}checked{% endif %}/><span>{{ eq }}</span></label>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="equipment" id="equipmentHidden" value="No Equipment"/>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="dietary_pref">Dietary Preference</label>
+            <select id="dietary_pref" name="dietary_pref">
+              <option>No Preference</option>
+              <option>Vegetarian</option>
+              <option>Vegan</option>
+              <option>Keto</option>
+              <option>Paleo</option>
+              <option>Gluten-Free</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="allergies">Allergies</label>
+            <input type="text" id="allergies" name="allergies" placeholder="e.g. nuts, dairy"/>
+          </div>
+        </div>
+        <div class="field">
+          <label for="limitations">Physical Limitations</label>
+          <input type="text" id="limitations" name="limitations" placeholder="e.g. back injury, knee pain"/>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary submit-btn" id="submitBtn">
+        <span class="submit-text">⚡ Generate AI Program</span>
+        <span class="submit-loading" style="display:none">
+          <span class="spinner"></span> Consulting Gemini...
+        </span>
+      </button>
+      <p class="submit-note">Estimated generation time: 25 seconds.</p>
+
+    </form>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Live BMI calculator
+function calcBMI() {
+  const w = parseFloat(document.getElementById('weight').value);
+  const h = parseFloat(document.getElementById('height').value);
+  if (!w || !h) return;
+  const bmi = (w / ((h/100)**2)).toFixed(1);
+  const cats = [[18.5,'Underweight','bmi-under'],[25,'Normal','bmi-ok'],[30,'Overweight','bmi-over'],[999,'Obese','bmi-obese']];
+  const [,cat,cls] = cats.find(([limit]) => bmi < limit);
+  document.getElementById('bmiVal').textContent = bmi;
+  const catEl = document.getElementById('bmiCategory');
+  catEl.textContent = cat;
+  catEl.className = 'bmi-cat ' + cls;
+  document.getElementById('bmiDisplay').style.display = 'block';
+}
+document.getElementById('weight').addEventListener('input', calcBMI);
+document.getElementById('height').addEventListener('input', calcBMI);
+
+// Equipment chips → hidden input
+function syncEquipment() {
+  const checked = [...document.querySelectorAll('#equipmentChips input:checked')].map(i => i.value);
+  document.getElementById('equipmentHidden').value = checked.join(', ') || 'No Equipment';
+}
+document.querySelectorAll('#equipmentChips input').forEach(cb => cb.addEventListener('change', syncEquipment));
+
+// Form submit loading state
+document.getElementById('planForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.querySelector('.submit-text').style.display = 'none';
+  btn.querySelector('.submit-loading').style.display = 'inline-flex';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}
