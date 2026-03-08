@@ -26,6 +26,7 @@ class UserPlan(Base):
     height: Mapped[float] = mapped_column(Float)          # cm
     goal: Mapped[str] = mapped_column(String(100))
     fitness_level: Mapped[str] = mapped_column(String(50))
+    workout_intensity: Mapped[str] = mapped_column(String(50))  # Low, Moderate, High, Extreme
     days_per_week: Mapped[int] = mapped_column(Integer)
     workout_duration: Mapped[int] = mapped_column(Integer)  # minutes
     equipment: Mapped[str] = mapped_column(String(500))

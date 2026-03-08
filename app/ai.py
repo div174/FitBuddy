@@ -76,6 +76,7 @@ class ModelController:
         equip = "No Equipment"
         age = "25"
         bmi = "24.0"
+        intensity = "Moderate"
         
         # Profile Extraction (Case-insensitive Regex for robustness)
         name_match = re.search(r"(?:Name|PROFILE):\s*(.*?)(?:\r?\n|,|$)", prompt, re.IGNORECASE)
@@ -86,6 +87,9 @@ class ModelController:
 
         level_match = re.search(r"Level:\s*(.*?)(?:\r?\n|,|$)", prompt, re.IGNORECASE)
         level = level_match.group(1).strip().title() if level_match else "Beginner"
+
+        intensity_match = re.search(r"Intensity:\s*(.*?)(?:\r?\n|,|$)", prompt, re.IGNORECASE)
+        intensity = intensity_match.group(1).strip().title() if intensity_match else "Moderate"
 
         equip_match = re.search(r"Equipment:\s*(.*?)(?:\r?\n|,|$)", prompt, re.IGNORECASE)
         equip = equip_match.group(1).strip().title() if equip_match else "No Equipment"
@@ -201,6 +205,7 @@ def generate_workout_plan(profile) -> str:
         - Age: {profile.age} | Gender: {profile.gender}
         - Weight: {profile.weight} kg | Height: {profile.height} cm | BMI: {profile.bmi}
         - Fitness Level: {profile.fitness_level}
+        - Workout Intensity: {profile.workout_intensity}
         - Primary Goal: {profile.goal}
         - Training Days/Week: {profile.days_per_week}
         - Session Duration: {profile.workout_duration} minutes
@@ -274,6 +279,7 @@ def generate_diet_plan(profile) -> str:
         - Age: {profile.age} | Gender: {profile.gender}
         - Weight: {profile.weight} kg | Height: {profile.height} cm
         - Goal: {profile.goal}
+        - Workout Intensity: {profile.workout_intensity}
         - TDEE: ~{tdee} kcal/day
         - Target Calories: ~{goal_calories} kcal/day
         - Dietary Preference: {profile.dietary_pref}
@@ -331,7 +337,7 @@ def generate_ai_tips(profile) -> str:
         actionable tips for this athlete.
 
         PROFILE: {profile.name}, {profile.age}yo {profile.gender}, 
-        Goal: {profile.goal}, Level: {profile.fitness_level}, BMI: {profile.bmi}
+        Goal: {profile.goal}, Level: {profile.fitness_level}, Intensity: {profile.workout_intensity}, BMI: {profile.bmi}
 
         Provide exactly these 5 sections:
 

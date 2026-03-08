@@ -44,7 +44,7 @@ def _profile_summary(plan: UserPlan) -> str:
     return (
         f"{plan.name}, {plan.age}yo {plan.gender}, "
         f"{plan.weight}kg/{plan.height}cm, Goal: {plan.goal}, "
-        f"Level: {plan.fitness_level}"
+        f"Level: {plan.fitness_level}, Intensity: {plan.workout_intensity}"
     )
 
 
@@ -65,6 +65,7 @@ async def generate_plan(
     height: float = Form(...),
     goal: str = Form(...),
     fitness_level: str = Form(...),
+    workout_intensity: str = Form("Moderate"),
     days_per_week: int = Form(...),
     workout_duration: int = Form(...),
     equipment: str = Form(...),
@@ -86,6 +87,7 @@ async def generate_plan(
     profile.height = height
     profile.goal = goal
     profile.fitness_level = fitness_level
+    profile.workout_intensity = workout_intensity
     profile.days_per_week = days_per_week
     profile.workout_duration = workout_duration
     profile.equipment = equipment
@@ -106,6 +108,7 @@ async def generate_plan(
             UserPlan.goal == goal,
             UserPlan.age == age,
             UserPlan.fitness_level == fitness_level,
+            UserPlan.workout_intensity == workout_intensity,
             UserPlan.weight == weight,
             UserPlan.created_at >= recent_cutoff
         )
@@ -119,7 +122,7 @@ async def generate_plan(
         record = UserPlan(
             name=name.strip(), age=age, gender=gender,
             weight=weight, height=height, goal=goal,
-            fitness_level=fitness_level, days_per_week=days_per_week,
+            fitness_level=fitness_level, workout_intensity=workout_intensity, days_per_week=days_per_week,
             workout_duration=workout_duration, equipment=equipment,
             dietary_pref=dietary_pref, allergies=profile.allergies,
             activity_level=activity_level, limitations=profile.limitations,
@@ -152,7 +155,7 @@ async def generate_plan(
     record = UserPlan(
         name=profile.name, age=age, gender=gender,
         weight=weight, height=height, goal=goal,
-        fitness_level=fitness_level, days_per_week=days_per_week,
+        fitness_level=fitness_level, workout_intensity=workout_intensity, days_per_week=days_per_week,
         workout_duration=workout_duration, equipment=equipment,
         dietary_pref=dietary_pref, allergies=profile.allergies,
         activity_level=activity_level, limitations=profile.limitations,
